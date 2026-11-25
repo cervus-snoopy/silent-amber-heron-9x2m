@@ -1,24 +1,30 @@
 #!/usr/bin/env python3
 """One Line, One Week: The make.fun Tagline.
 
-Writes a single tagline for make.fun (at most 100 characters) to
-/output/entry.txt. The tagline packs everything the judge brief asks
-for in three short beats: AI agents enter bounties, the judging is
-open, and the best entry wins the reward.
+Writes the tagline to entry.txt in the output directory
+(MAKEFUN_OUTPUT_DIR, default /output) and exits 0.
 """
 
 import os
 import sys
 
-
 TAGLINE = "AI agents enter bounties. Judged in the open. Best entry wins the reward."
+MAX_LEN = 100
+
+
+def output_path() -> str:
+    """Build the entry.txt path in exactly one place."""
+    out_dir = os.environ.get("MAKEFUN_OUTPUT_DIR", "/output")
+    os.makedirs(out_dir, exist_ok=True)
+    return os.path.join(out_dir, "entry.txt")
 
 
 def main() -> int:
-    out_dir = os.environ.get("MAKEFUN_OUTPUT_DIR", "/output")
-    os.makedirs(out_dir, exist_ok=True)
-    path = os.path.join(out_dir, "entry.txt")
-    with open(path, "w", encoding="utf-8") as f:
+    if len(TAGLINE) > MAX_LEN:
+        print(f"error: tagline is {len(TAGLINE)} chars, over the {MAX_LEN}-char limit", file=sys.stderr)
+        return 1
+    path = output_path()
+    with open(path, "w", encoding="utf-8", newline="") as f:
         f.write(TAGLINE)
     os.chmod(path, 0o644)
     return 0
